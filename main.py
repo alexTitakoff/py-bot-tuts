@@ -15,61 +15,24 @@ def get_updates():
 def get_last_updates():
     url = URL + 'getupdates'
     r = requests.get(url)
-
     if len(r.json()['result']) != 0:
         return r.json()['result'][-1]
     else:
         return None
 
 
-# @bot.message_handler(content_types=['text'])
-# def handle_text(message):
-#     l_upd = get_last_updates()
-#     print(l_upd['message'])
-#     print(l_upd['message']['text'])
+# Типо справочник юзера TODO: разобраться что за тип данных и как в него заносится
+user_dict = {}
 
 
-# def log(message, answer):
-#     print('\n ------')
-#     from datetime import datetime
-#     print(datetime.now())
-#     print("Сообщение от {0} {1}. (id={2}) \n Текст - {3}".format(message.from_user.first_name,
-#                                                                  message.from_user.last_name,
-#                                                                  str(message.from_user.id),
-#                                                                  message.text))
-#     print(answer)
-#
-#
-# @bot.message_handler(commands=['help'])
-# def handle_text(message):
-#     bot.send_message(message.chat.id, 'Это комманда помощи')
-#
-#
-# @bot.message_handler(commands=['game'])
-# def handle_text(message):
-#     bot.send_message(message.chat.id, 'игра городки началась')
-#     bot.send_message(message.chat.id, 'Оренбург')
-#
-#     @bot.message_handler(content_types=['text'])
-#     def handle_text(message):
-#         print(message.text)
-#
-#
-# @bot.message_handler(commands=['keyboard'])
-# def handle_keyboard(message):
-#     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-#     user_markup.row('/start', '/hide')
-#     user_markup.row('фото', 'аудио', 'документы')
-#     user_markup.row('стикер', 'видео', 'локация')
-#     user_markup.one_time_keyboard = True  # скрытие после выбора
-#     bot.send_message(message.from_user.id, 'Добро пожаловать', reply_markup=user_markup)
-#
-#
-# @bot.message_handler(commands=['hide'])
-# def hide_keyboard(message):
-#     # hide_markup = telebot.types.ReplyKeyboardRemove(selective=False)
-#     # bot.send_message(message.from_user.id,'..', reply_markup=hide_markup)
-#     print('hide command')
+# Типо собирает объект юзера кажись в итоге .
+# // Но тогда вопрос зачем справочник ? или что можеть
+# делать спраочник чего не можт объект и наоборот
+class User:
+    def __init__(self, name):
+        self.name = name
+        self.age = None
+        self.sex = None
 
 
 class MainState:
@@ -79,41 +42,45 @@ class MainState:
 # Определяем состояние всего бота
 main_state = MainState()
 main_state.start = False
+main_state.name = False
 
+
+@bot.message_handler(commands=['start_reg'])
+def start_reg(message):
+    bot.send_message(message.from_user.id, 'Начало регистрации')
+    main_state.start = True  # зашли в хук
+
+    msg = bot.reply_to(message, """\
+    Hi there, I am Example bot.
+    What's your name?
+    """)
+    bot.register_next_step_handler(msg, process_name_step)
+
+
+def process_name_step(message):
+    try:
+        chat_id = message.chat.id
+        name = message.text
+        print(name)
+        # user = User(name)
+        # user_dict[chat_id] = user
+        msg = bot.reply_to(message, 'How old are you?')
+        bot.register_next_step_handler(msg, next_step)
+    except Exception as e:
+        bot.reply_to(message, 'oooops')
+
+
+def next_step(message):
+    print('Next step work!')
 
 
 @bot.message_handler(commands=['start'])
-def hide_keyboard(message):
+def init_commands(message):
     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-    user_markup.row('о музыке', 'о котиках')
+    user_markup.row('/start_reg', 'отмена')
     user_markup.one_time_keyboard = True  # скрытие после выбора
 
-    bot.send_message(message.from_user.id, 'Привет о чем поговорим?', reply_markup=user_markup)
-
-    main_state.start = True     # зашли в хук
-
-
-def start_func(message):
-    if message.text == 'о музыке':
-        bot.send_message(message.chat.id, 'хоршо давай погорим о музыке')
-
-        # импортируем модуль отвечающий за блок музыки
-        import modules.music
-        modules.music.init(message)
-
-    if message.text == 'о котиках':
-        bot.send_message(message.chat.id, 'хоршо давай погорим о котиках')
-
-    main_state.start = False   # выходим из хука
-
-
-@bot.message_handler(content_types=['text'])
-def handle(message):
-    print(main_state.start)
-    if main_state.start:
-        start_func(message)
-
-
+    bot.send_message(message.from_user.id, 'Привет вот стартовые комманды', reply_markup=user_markup)
 
 
 bot.polling(none_stop=True, interval=0)
