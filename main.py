@@ -12,6 +12,23 @@ def get_updates():
     return r.json()
 
 
+def get_last_updates():
+    url = URL + 'getupdates'
+    r = requests.get(url)
+
+    if len(r.json()['result']) != 0:
+        return r.json()['result'][-1]
+    else:
+        return None
+
+
+# @bot.message_handler(content_types=['text'])
+# def handle_text(message):
+#     l_upd = get_last_updates()
+#     print(l_upd['message'])
+#     print(l_upd['message']['text'])
+
+
 # def log(message, answer):
 #     print('\n ------')
 #     from datetime import datetime
@@ -55,6 +72,15 @@ def get_updates():
 #     print('hide command')
 
 
+class MainState:
+    pass
+
+
+# Определяем состояние всего бота
+main_state = MainState()
+main_state.start = False
+
+
 
 @bot.message_handler(commands=['start'])
 def hide_keyboard(message):
@@ -64,27 +90,28 @@ def hide_keyboard(message):
 
     bot.send_message(message.from_user.id, 'Привет о чем поговорим?', reply_markup=user_markup)
 
-    enter_var = True
-    print('-- command start--')
-    print(enter_var)
+    main_state.start = True     # зашли в хук
 
-    @bot.message_handler(content_types=['text'])
-    def handle(message):
-        nonlocal enter_var
-        print('-- inner --')
-        print(enter_var)
 
-        if enter_var and message.text == 'о музыке':
-            bot.send_message(message.chat.id, 'хоршо давай погорим о музыке')
+def start_func(message):
+    if message.text == 'о музыке':
+        bot.send_message(message.chat.id, 'хоршо давай погорим о музыке')
 
-            # импортируем модуль отвечающий за блок музыки
-            import modules.music
-            modules.music.init(message)
+        # импортируем модуль отвечающий за блок музыки
+        import modules.music
+        modules.music.init(message)
 
-            enter_var = False
+    if message.text == 'о котиках':
+        bot.send_message(message.chat.id, 'хоршо давай погорим о котиках')
 
-        if message.text == 'о котиках':
-            bot.send_message(message.chat.id, 'хоршо давай погорим о котиках')
+    main_state.start = False   # выходим из хука
+
+
+@bot.message_handler(content_types=['text'])
+def handle(message):
+    print(main_state.start)
+    if main_state.start:
+        start_func(message)
 
 
 
