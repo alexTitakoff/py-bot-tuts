@@ -55,6 +55,8 @@ def start_reg_handler(message):
     modules.registration.init(message,bot,user)
 
 
+
+
 @bot.message_handler(commands=['start'])
 def init_commands(message):
     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
@@ -63,17 +65,24 @@ def init_commands(message):
 
     bot.send_message(message.from_user.id, 'Привет вот стартовые комманды', reply_markup=user_markup)
 
-    print(get_last_updates())
-
-
-def send_info(chat_id):
-    bot.send_message(chat_id, 'Тут вот какая то информация для общей рассылки')
 
 
 
+
+
+# my test chat.id   125875089
+#
+# def send_info():
+#     bot.send_message(125875089, 'Тут вот какая то информация для общей рассылки')
+
+
+# Отпрвка мессаджа
 # time.sleep(10)
 # send_info()
 
-
+#
+# while True:
+#     time.sleep(2)
+#     print(get_updates())
 
 bot.polling(none_stop=True, interval=0)
