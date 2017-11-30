@@ -46,32 +46,9 @@ main_state.name = False
 
 
 @bot.message_handler(commands=['start_reg'])
-def start_reg(message):
-    bot.send_message(message.from_user.id, 'Начало регистрации')
-    main_state.start = True  # зашли в хук
-
-    msg = bot.reply_to(message, """\
-    Hi there, I am Example bot.
-    What's your name?
-    """)
-    bot.register_next_step_handler(msg, process_name_step)
-
-
-def process_name_step(message):
-    try:
-        chat_id = message.chat.id
-        name = message.text
-        print(name)
-        # user = User(name)
-        # user_dict[chat_id] = user
-        msg = bot.reply_to(message, 'How old are you?')
-        bot.register_next_step_handler(msg, next_step)
-    except Exception as e:
-        bot.reply_to(message, 'oooops')
-
-
-def next_step(message):
-    print('Next step work!')
+def start_reg_handler(message):
+    import modules.registration
+    modules.registration.init(message,bot)
 
 
 @bot.message_handler(commands=['start'])
