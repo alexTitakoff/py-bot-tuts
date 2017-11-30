@@ -1,6 +1,7 @@
 import requests
 import telebot
 import config
+import time
 
 bot = telebot.TeleBot(config.token)
 URL = 'https://api.telegram.org/bot' + config.token + '/'
@@ -34,6 +35,9 @@ class User:
         self.age = None
         self.sex = None
 
+user = User('null')
+
+
 
 class MainState:
     pass
@@ -48,7 +52,7 @@ main_state.name = False
 @bot.message_handler(commands=['start_reg'])
 def start_reg_handler(message):
     import modules.registration
-    modules.registration.init(message,bot)
+    modules.registration.init(message,bot,user)
 
 
 @bot.message_handler(commands=['start'])
@@ -58,6 +62,18 @@ def init_commands(message):
     user_markup.one_time_keyboard = True  # скрытие после выбора
 
     bot.send_message(message.from_user.id, 'Привет вот стартовые комманды', reply_markup=user_markup)
+
+    print(get_last_updates())
+
+
+def send_info(chat_id):
+    bot.send_message(chat_id, 'Тут вот какая то информация для общей рассылки')
+
+
+
+# time.sleep(10)
+# send_info()
+
 
 
 bot.polling(none_stop=True, interval=0)
